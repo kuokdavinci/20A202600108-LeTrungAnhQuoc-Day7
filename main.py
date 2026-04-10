@@ -1,8 +1,10 @@
-from __future__ import annotations
-
 import os
 import sys
 from pathlib import Path
+
+# Ensure the terminal handles UTF-8 for printing special characters (Vietnamese, quotes, etc.)
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 from dotenv import load_dotenv
 
@@ -15,17 +17,19 @@ from src.embeddings import (
     OpenAIEmbedder,
     _mock_embed,
 )
+from openai import OpenAI
 from src.models import Document
 from src.store import EmbeddingStore
 
-SAMPLE_FILES = [
-    "data/python_intro.txt",
-    "data/vector_store_notes.md",
-    "data/rag_system_design.md",
-    "data/customer_support_playbook.txt",
-    "data/chunking_experiment_report.md",
-    "data/vi_retrieval_notes.md",
-]
+# Load all 20 documents for a comprehensive test if they exist
+try:
+    wiki_path = Path("data/wiki_docs")
+    if wiki_path.exists():
+        SAMPLE_FILES = sorted([str(f) for f in wiki_path.glob("*.txt")])
+    else:
+        SAMPLE_FILES = []
+except Exception:
+    SAMPLE_FILES = []
 
 
 def load_documents_from_files(file_paths: list[str]) -> list[Document]:
@@ -45,21 +49,33 @@ def load_documents_from_files(file_paths: list[str]) -> list[Document]:
             continue
 
         content = path.read_text(encoding="utf-8")
+        
+        # Parse category from filename (e.g. "Gaming_Bullet_Kin" -> category="Gaming")
+        stem = path.stem
+        category = "General"
+        if "_" in stem:
+            parts = stem.split("_", 1)
+            category = parts[0]
+            title = parts[1]
+        else:
+            title = stem
+
         documents.append(
             Document(
-                id=path.stem,
+                id=title,
                 content=content,
-                metadata={"source": str(path), "extension": path.suffix.lower()},
+                metadata={
+                    "source": str(path), 
+                    "extension": path.suffix.lower(),
+                    "category": category
+                },
             )
         )
 
     return documents
 
 
-def demo_llm(prompt: str) -> str:
-    """A simple mock LLM for manual RAG testing."""
-    preview = prompt[:400].replace("\n", " ")
-    return f"[DEMO LLM] Generated answer from prompt preview: {preview}..."
+# Removed demo_llm mock because we now use src/llms.py
 
 
 def run_manual_demo(question: str | None = None, sample_files: list[str] | None = None) -> int:
@@ -100,7 +116,24 @@ def run_manual_demo(question: str | None = None, sample_files: list[str] | None 
 
     print(f"\nEmbedding backend: {getattr(embedder, '_backend_name', embedder.__class__.__name__)}")
 
-    store = EmbeddingStore(collection_name="manual_test_store", embedding_fn=embedder)
+    # 2. Strategy & Store
+    strategy_name = os.getenv("CHUNKING_STRATEGY", "recursive").strip().lower()
+    print(f"Using chunking strategy: {strategy_name}")
+    
+    if strategy_name == "semantic":
+        from src.chunking import SemanticChunker
+        chunker = SemanticChunker(embedding_fn=embedder, threshold=0.5)
+    elif strategy_name == "by_sentences":
+        from src.chunking import SentenceChunker
+        chunker = SentenceChunker(max_sentences_per_chunk=3)
+    elif strategy_name == "fixed_size":
+        from src.chunking import FixedSizeChunker
+        chunker = FixedSizeChunker(chunk_size=500, overlap=50)
+    else:
+        from src.chunking import RecursiveChunker
+        chunker = RecursiveChunker(chunk_size=500)
+    
+    store = EmbeddingStore(collection_name="manual_test_store", embedding_fn=embedder, chunker=chunker)
     store.add_documents(docs)
 
     print(f"\nStored {store.get_collection_size()} documents in EmbeddingStore")
@@ -108,14 +141,21 @@ def run_manual_demo(question: str | None = None, sample_files: list[str] | None 
     print(f"Query: {query}")
     search_results = store.search(query, top_k=3)
     for index, result in enumerate(search_results, start=1):
-        print(f"{index}. score={result['score']:.3f} source={result['metadata'].get('source')}")
+        metadata = result.get("metadata", {})
+        print(f"{index}. score={result['score']:.3f} source={metadata.get('source')}")
+        print(f"   category={metadata.get('category', 'General')}")
         print(f"   content preview: {result['content'][:120].replace(chr(10), ' ')}...")
 
     print("\n=== KnowledgeBaseAgent Test ===")
-    agent = KnowledgeBaseAgent(store=store, llm_fn=demo_llm)
+    
+    # Agent now handles LLM internally via Ollama/OpenAI API
+    agent = KnowledgeBaseAgent(store=store)
+    
     print(f"Question: {query}")
     print("Agent answer:")
+    print("-" * 40)
     print(agent.answer(query, top_k=3))
+    print("-" * 40)
     return 0
 
 

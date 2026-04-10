@@ -15,7 +15,12 @@ class MockEmbedder:
         self.dim = dim
         self._backend_name = "mock embeddings fallback"
 
-    def __call__(self, text: str) -> list[float]:
+    def __call__(self, text: str | list[str]) -> list[float] | list[list[float]]:
+        if isinstance(text, str):
+            return self._embed_single(text)
+        return [self._embed_single(t) for t in text]
+
+    def _embed_single(self, text: str) -> list[float]:
         digest = hashlib.md5(text.encode()).hexdigest()
         seed = int(digest, 16)
         vector = []
@@ -36,25 +41,30 @@ class LocalEmbedder:
         self._backend_name = model_name
         self.model = SentenceTransformer(model_name)
 
-    def __call__(self, text: str) -> list[float]:
-        embedding = self.model.encode(text, normalize_embeddings=True)
-        if hasattr(embedding, "tolist"):
-            return embedding.tolist()
-        return [float(value) for value in embedding]
+    def __call__(self, text: str | list[str]) -> list[float] | list[list[float]]:
+        embeddings = self.model.encode(text, normalize_embeddings=True)
+        if isinstance(text, list):
+            return embeddings.tolist() if hasattr(embeddings, "tolist") else [list(map(float, e)) for e in embeddings]
+        return embeddings.tolist() if hasattr(embeddings, "tolist") else [float(v) for v in embeddings]
 
 
 class OpenAIEmbedder:
     """OpenAI embeddings API-backed embedder."""
 
-    def __init__(self, model_name: str = OPENAI_EMBEDDING_MODEL) -> None:
+    def __init__(self, model_name: str = OPENAI_EMBEDDING_MODEL, api_key: str | None = None) -> None:
         from openai import OpenAI
+        import os
 
         self.model_name = model_name
         self._backend_name = model_name
-        self.client = OpenAI()
+        
+        actual_key = api_key or os.getenv("OPENAI_API_KEY")
+        self.client = OpenAI(api_key=actual_key)
 
-    def __call__(self, text: str) -> list[float]:
+    def __call__(self, text: str | list[str]) -> list[float] | list[list[float]]:
         response = self.client.embeddings.create(model=self.model_name, input=text)
+        if isinstance(text, list):
+            return [list(map(float, d.embedding)) for d in response.data]
         return [float(value) for value in response.data[0].embedding]
 
 
