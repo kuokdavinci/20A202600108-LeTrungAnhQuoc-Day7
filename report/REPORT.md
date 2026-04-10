@@ -111,9 +111,14 @@ for i in range(1, len(sentences)):
 
 | Thành viên | Strategy | Retrieval Score (/10) | Điểm mạnh | Điểm yếu |
 |-----------|----------|----------------------|-----------|----------|
-| Tôi | SemanticChunker | 8.0 | Giữ được ngữ cảnh của câu và giảm thiểu việc cắt ngang một mô tả quan trọng. | Tốn nhiều tài nguyên hơn so với RecursiveChunker. |
-| [Tên] | | | | |
-| [Tên] | | | | |
+| Tôi | Semantic | 8.0 | Chia chunk dựa trên sự tương đồng ý nghĩa, giữ trọn vẹn mạch thông tin và ngữ cảnh, hạn chế việc cắt ngang các mô tả quan trọng. | Tốn nhiều tài nguyên tính toán (Embedding API), tốc độ xử lý chậm hơn các phương pháp tách chuỗi thông thường. |
+| Trần Thái Thịnh | Recursive | 7.5 | Giữ được cấu trúc văn bản (đoạn, câu) thông qua việc tách đệ quy linh hoạt, cân bằng tốt giữa kích thước và ngữ cảnh. | Vẫn dựa trên tách chuỗi vật lý, đôi khi vẫn cắt ngang context nếu các paragraph quá dài hoặc không có dấu phân cách rõ ràng. |
+| Nguyễn Đức Cường | Sentence | 6.5 | Đảm bảo tính toàn vẹn của từng câu, giúp mô hình hiểu ngữ cảnh ở mức độ câu tốt hơn so với cắt theo ký tự ngẫu nhiên. | Kích thước chunk không đồng đều (có câu quá dài/quá ngắn), thông tin dễ bị phân mảnh nếu không gộp nhiều câu liên quan. |
+| Nguyễn Văn Thạch | Recursive | 7.5 | Giữ được cấu trúc văn bản (đoạn, câu) thông qua việc tách đệ quy linh hoạt, cân bằng tốt giữa kích thước và ngữ cảnh. | Vẫn dựa trên tách chuỗi vật lý, đôi khi vẫn cắt ngang context nếu các paragraph quá dài hoặc không có dấu phân cách rõ ràng. |
+| Trần Khánh Bằng | Layered | 8.5 | Truy xuất thông tin đa tầng (kết hợp chunk lớn bao quát và chunk nhỏ chi tiết), giúp Agent nắm bắt cả tổng quan lẫn chi tiết cụ thể. | Cấu trúc index phức tạp, tốn bộ nhớ lưu trữ và đòi hỏi logic truy vấn nâng cao để xử lý các tầng dữ liệu. |
+| Đỗ Hải Nam | Semantic | 8.0 | Chia chunk dựa trên sự tương đồng ý nghĩa, giữ trọn vẹn mạch thông tin và ngữ cảnh, hạn chế việc cắt ngang các mô tả quan trọng. | Tốn nhiều tài nguyên tính toán (Embedding API), tốc độ xử lý chậm hơn các phương pháp tách chuỗi thông thường. |
+
+
 
 **Strategy nào tốt nhất cho domain này? Tại sao?**
 >Theo em nghĩ là strategy tốt nhất cho domain này là semantic chunker vì nó giữ được ngữ cảnh của câu và giảm thiểu việc cắt ngang một mô tả quan trọng. Nhất là trong domain mang tính chất là các tài liệu wiki, các câu thường có liên quan đến nhau và việc cắt ngang một mô tả quan trọng sẽ làm giảm chất lượng truy xuất.
