@@ -38,8 +38,8 @@ Hoàn thành các TODO trong thư mục `src/`:
 - [x] Thiết kế **Metadata Schema** (source_url, index).
 
 ### 5. So sánh & Đánh giá
-- [ ] Thống nhất **5 Benchmark Queries** kèm đáp án chuẩn (Sử dụng question CSVs).
-- [/] Mỗi thành viên thử 1 chiến lược khác nhau (Đang triển khai hỗ trợ CSV).
+- [x] Thống nhất **5 Benchmark Queries** kèm đáp án chuẩn (Đã có trong report).
+- [x] Mỗi thành viên thử 1 chiến lược khác nhau (Đã chọn SemanticChunker).
 - [ ] Chạy benchmark và so sánh kết quả retrieval giữa các thành viên.
 - [ ] Phân tích trường hợp thất bại (Failure Analysis).
 
