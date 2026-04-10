@@ -1,3 +1,4 @@
+https://bytes-and-nibbles.web.app/bytes/stici-note-part-1-planning-and-prototyping
 Semantic and Textual Inference Chatbot Interface (STICI-Note) - Part 1: Planning and Prototyping
 
 The start of my RAG to riches story

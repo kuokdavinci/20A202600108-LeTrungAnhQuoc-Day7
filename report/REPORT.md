@@ -51,12 +51,12 @@ The system currently indexes 7 documents split across various domains:
 
 | ID | Filename | Category | Source/Topic |
 |---|---|---|---|
-| Bullet_Kin | Gaming_Bullet_Kin.txt | Gaming | Enter the Gungeon Wiki |
-| Underground_Travel | General_Underground_Travel.txt | General | RPG Campaign Notes |
-| RAG_Chatbot_Blog | Engineering_RAG_Chatbot_Blog.txt | Engineering | STICI-Note Prototyping |
-| llmware_Docs | Engineering_llmware_Docs.txt | Engineering | Enterprise RAG Framework |
-| Marimo_Recipes | Engineering_Marimo_Recipes.txt | Engineering | UI/Code Snippets |
-| Impact_Prioritization | General_Impact_Prioritization.txt | General | Career / Data Science Impact |
+| Bullet_Kin | Gaming | Gaming | Enter the Gungeon Wiki |
+| Underground_Travel | General | General | RPG Campaign Notes |
+| RAG_Chatbot_Blog | Engineering | Engineering | STICI-Note Prototyping |
+| llmware_Docs | Engineering | Engineering | Enterprise RAG Framework |
+| Marimo_Recipes | Engineering | Engineering | UI/Code Snippets |
+| Impact_Prioritization | General | General | Career / Data Science Impact |
 | EU_AI_Act | Legal_EU_AI_Act.txt | Legal | AI Regulation Summary |
 
 ### Metadata Schema

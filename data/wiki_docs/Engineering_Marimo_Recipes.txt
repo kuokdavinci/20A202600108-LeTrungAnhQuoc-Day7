@@ -1,3 +1,4 @@
+https://docs.marimo.io/recipes.html
 Recipes
 This page includes code snippets or “recipes” for a variety of common tasks. Use them as building blocks or examples when making your own notebooks.
 

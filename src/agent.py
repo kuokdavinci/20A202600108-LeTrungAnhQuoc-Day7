@@ -71,10 +71,13 @@ class KnowledgeBaseAgent:
         # 2. Build the context string
         context_parts = []
         for i, res in enumerate(results, start=1):
-            source = res.get("metadata", {}).get("source", "N/A")
-            category = res.get("metadata", {}).get("category", "General")
+            meta = res.get("metadata", {})
+            source = meta.get("source", "N/A")
+            category = meta.get("category", "General")
+            url = meta.get("source_url", "N/A")
+            
             context_parts.append(
-                f"--- Đoạn trích {i} [Nguồn: {source}] [Chủ đề: {category}] ---\n"
+                f"--- Đoạn trích {i} [Nguồn: {source}] [Chủ đề: {category}] [URL: {url}] ---\n"
                 f"{res.get('content', '')}"
             )
         

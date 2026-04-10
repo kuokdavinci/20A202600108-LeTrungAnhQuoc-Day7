@@ -36,7 +36,7 @@ def load_documents_from_files(file_paths: list[str]) -> list[Document]:
     """Load documents from file paths for the manual demo."""
     allowed_extensions = {".md", ".txt"}
     documents: list[Document] = []
-
+    
     for raw_path in file_paths:
         path = Path(raw_path)
 
@@ -48,26 +48,35 @@ def load_documents_from_files(file_paths: list[str]) -> list[Document]:
             print(f"Skipping missing file: {path}")
             continue
 
-        content = path.read_text(encoding="utf-8")
+        content_lines = path.read_text(encoding="utf-8").splitlines()
         
+        # Check if the first line is a URL as per report description
+        if content_lines and content_lines[0].startswith("http"):
+            source_url = content_lines[0].strip()
+            content = "\n".join(content_lines[1:])
+        else:
+            source_url = "N/A"
+            content = "\n".join(content_lines)
+            
         # Parse category from filename (e.g. "Gaming_Bullet_Kin" -> category="Gaming")
         stem = path.stem
         category = "General"
         if "_" in stem:
             parts = stem.split("_", 1)
             category = parts[0]
-            title = parts[1]
+            doc_id = parts[1]
         else:
-            title = stem
+            doc_id = stem
 
         documents.append(
             Document(
-                id=title,
+                id=doc_id,
                 content=content,
                 metadata={
                     "source": str(path), 
                     "extension": path.suffix.lower(),
-                    "category": category
+                    "category": category,
+                    "source_url": source_url
                 },
             )
         )
